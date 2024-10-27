@@ -34,16 +34,18 @@ class Action_Conditioned_FF(nn.Module):
 # output and the desired output.
         model.eval()
         total_loss = 0.0
+        total_samples = 0
         with torch.no_grad():
             for batch in test_loader:
                 inputs = batch['input']
                 labels = batch['label']
                 outputs = model(inputs)
-
                 labels = labels.view_as(outputs)
                 loss = loss_function(outputs, labels)
-                total_loss += loss.item() * inputs.size(0)
-        average_loss = total_loss / len(test_loader.dataset)
+                batch_size = inputs.size(0)
+                total_loss += loss.item() * batch_size
+                total_samples += batch_size
+        average_loss = total_loss / total_samples
         return average_loss
 
 def main():
@@ -51,3 +53,4 @@ def main():
 
 if __name__ == '__main__':
     main()
+
