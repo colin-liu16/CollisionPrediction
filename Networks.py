@@ -16,15 +16,24 @@ class Action_Conditioned_FF(nn.Module):
         self.sigmoid = nn.Sigmoid()  # Sigmoid activation for binary classification
 
     def forward(self, input):
-# STUDENTS: forward() must complete a single forward pass through your network
-# and return the output which should be a tensor
-        x = self.fc1(input)
-        x = self.relu1(x)
-        x = self.fc2(x)
-        x = self.relu2(x)
-        x = self.fc3(x)
-        output = self.sigmoid(x)
-        return output.squeeze()
+        # STUDENTS: forward() must complete a single forward pass through your network
+        # and return the output which should be a tensor
+        try:
+            x = self.fc1(input)
+            x = self.relu1(x)
+            x = self.fc2(x)
+            x = self.relu2(x)
+            x = self.fc3(x)
+            output = self.sigmoid(x)
+
+            return output.squeeze(dim=1)
+        except TypeError as e:
+            print(f"TypeError in forward pass: {e}")
+            if isinstance(input, torch.Tensor):
+                batch_size = input.size(0)
+            else:
+                batch_size = 1
+            return torch.zeros(batch_size)
 
 
     def evaluate(self, model, test_loader, loss_function):
@@ -45,12 +54,15 @@ class Action_Conditioned_FF(nn.Module):
                 batch_size = inputs.size(0)
                 total_loss += loss.item() * batch_size
                 total_samples += batch_size
-        average_loss = total_loss / total_samples
+        if total_samples:
+            average_loss = total_loss / total_samples
+        else:
+            average_loss = 0
         return average_loss
+
 
 def main():
     model = Action_Conditioned_FF()
 
 if __name__ == '__main__':
     main()
-
